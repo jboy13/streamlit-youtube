@@ -6,8 +6,22 @@ This app loads the data into duckdb which is then queried to generte the visuali
 
 1) Clone repo
 
+`git clone https://github.com/jboy13/streamlit-youtube.git`
+
 2) Create Virtual Environment
 
-3) Install requirements
+`python3 -m venv env`
 
-4) Run app using `streamlit run app.py`
+3) Activate Environment
+
+`source env/bin/activate`
+
+4) Install requirements
+
+`pip3 install requirements.txt`
+
+5) Run app
+
+`streamlit run app.py`
+
+Once the app is open simply upload your watch-history.json file fromgoogle takeout
