@@ -1,0 +1,6 @@
+streamlit
+pandas
+duckdb
+duckdb_engine
+sqlalchemy
+humanize

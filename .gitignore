@@ -1,0 +1,5 @@
+env
+youtube.duckdb
+youtube.duckdb.wal
+watch-history.json
+__pycache__
