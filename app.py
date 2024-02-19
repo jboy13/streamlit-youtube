@@ -146,7 +146,6 @@ def display_statistics(session) -> None:
                 )
                 st.markdown("---")
                 st.markdown(f"**{humanize.intcomma(video_metric.views)}** views")
-    st.header('Summary')
 
 
 def run() -> None:
