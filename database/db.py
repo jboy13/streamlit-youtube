@@ -3,7 +3,7 @@ import datetime
 from typing import Sequence, Tuple
 
 from sqlalchemy import (
-    create_engine, Column, String, ARRAY, JSON, DateTime, and_, Integer, select
+    create_engine, distinct, Column, String, ARRAY, JSON, DateTime, and_, Integer, select
 )
 from sqlalchemy.ext.mutable import MutableDict
 from sqlalchemy.dialects.postgresql import ARRAY
@@ -99,7 +99,7 @@ def get_videos(session) -> list[str]:
     ]
 
 def get_video_metrics_by_channel(
-    session: Session, limit: int = 10, **filters
+    session: Session, limit: int = 10, offset: int = None, **filters
 ) -> Sequence[Row[Tuple[str, int, datetime.timedelta]]]:
     """List of tuples containing the artist, stream count and time played."""
     return session.execute(
@@ -109,14 +109,15 @@ def get_video_metrics_by_channel(
                 func.count(Videos.channel).label("views")
             )
             .group_by(Videos.channel)
-            .order_by(func.count(Videos.channel).desc())
-            .limit(limit),
+            .order_by(func.count(Videos.channel).desc(), Videos.channel)
+            .limit(limit)
+            .offset(offset),
             **filters
         )
     ).all()
 
 def get_video_metrics_by_video(
-    session: Session, limit: int = 10, **filters
+    session: Session, limit: int = 10, offset: int = None, **filters
 ) -> Sequence[Row[Tuple[str, int, datetime.timedelta]]]:
     """List of tuples containing the artist, stream count and time played."""
     return session.execute(
@@ -127,8 +128,9 @@ def get_video_metrics_by_video(
                 func.count(Videos.count).label("views")
             )
             .group_by(Videos.title,Videos.channel)
-            .order_by(func.count(Videos.title).desc())
-            .limit(limit),
+            .order_by(func.count(Videos.title).desc(),Videos.title)
+            .limit(limit)
+            .offset(offset),
             **filters
         )
     ).all()
@@ -151,5 +153,19 @@ def get_total_video_count(session: Session, **filters) -> int:
     """Total stream count."""
     return (
         session.scalar(apply_filters(select(func.count(Videos.title)), **filters))
+        or 0
+    )
+
+def get_total_unique_video_count(session: Session, **filters) -> int:
+    """Total stream count."""
+    return (
+        session.scalar(apply_filters(select(func.count(func.distinct(Videos.title))), **filters))
+        or 0
+    )
+
+def get_total_unique_channel_count(session: Session, **filters) -> int:
+    """Total stream count."""
+    return (
+        session.scalar(apply_filters(select(func.count(func.distinct(Videos.channel))), **filters))
         or 0
     )

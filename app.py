@@ -10,7 +10,9 @@ from database.db import (
     get_video_metrics_by_channel,
     get_video_count_by_day,
     get_total_video_count,
-    get_video_metrics_by_video
+    get_video_metrics_by_video,
+    get_total_unique_video_count,
+    get_total_unique_channel_count
 )
 import streamlit as st
 import humanize
@@ -50,6 +52,16 @@ def videos(_session) -> list[str]:
     """List of videos."""
     return get_videos(_session)
 
+@st.cache_data()
+def total_unique_channels(_session, **filters) -> int:
+    """List of videos."""
+    return get_total_unique_channel_count(_session, **filters)
+
+@st.cache_data()
+def total_unique_videos(_session, **filters) -> int:
+    """List of videos."""
+    return get_total_unique_video_count(_session, **filters)
+
 def display_filters(session) -> dict:
     """Display the data filters."""
     date_range_start, date_range_end = date_range(session)
@@ -72,17 +84,13 @@ def display_statistics(session) -> None:
     filters = display_filters(session)
 
     video_count = total_video_count(session, **filters)
+    unique_channels = total_unique_channels(session, **filters)
 
     st.markdown(
         f"""
         You listened to **{humanize.intcomma(video_count)}** videos,
-        :astonished:
+        and **{humanize.intcomma(unique_channels)}** unique channels :astonished:
         """,
-    )
-    st.caption(
-        f"""
-        That's an average of x videos per day
-        """
     )
     st.bar_chart(
         video_count_by_day(session, **filters), x="date", y="views", color="#1DB954"
@@ -91,19 +99,32 @@ def display_statistics(session) -> None:
     st.header(":microphone: Most Watched Channel")
     columns = st.columns(6)
     for i, channel_metric in enumerate(
-        get_video_metrics_by_channel(session, 6, **filters)
+        get_video_metrics_by_channel(session, limit=6, **filters)
     ):
         with columns[i].container(height=200):
-            st.container(height=20, border=False).markdown(
+            st.container(height=70, border=False).markdown(
                 f"**{channel_metric.channel}**"
             )
             st.markdown("---")
             st.markdown(f"**{humanize.intcomma(channel_metric.views)}** views")
 
+    more = st.button('See more')
+    if more:
+        for i, channel_metric in enumerate(
+            get_video_metrics_by_channel(session, limit=6, offset=6, **filters)
+        ):
+            with columns[i].container(height=200):
+                st.container(height=70, border=False).markdown(
+                    f"**{channel_metric.channel}**"
+                )
+                st.markdown("---")
+                st.markdown(f"**{humanize.intcomma(channel_metric.views)}** views")
+
+
     st.header(":musical_note: Most Watched Videos")
     columns = st.columns(6)
     for i, video_metric in enumerate(
-        get_video_metrics_by_video(session, 6, **filters)
+        get_video_metrics_by_video(session, limit=6, **filters)
     ):
         with columns[i].container(border=True, height=280):
             st.container(height=100, border=False).markdown(
@@ -112,6 +133,21 @@ def display_statistics(session) -> None:
             )
             st.markdown("---")
             st.markdown(f"**{humanize.intcomma(video_metric.views)}** views")
+
+    more_videos = st.button('See more ')
+    if more_videos:
+        for i, video_metric in enumerate(
+            get_video_metrics_by_video(session, limit=6, offset=6, **filters)
+        ):
+            with columns[i].container(border=True, height=280):
+                st.container(height=100, border=False).markdown(
+                    f"**{video_metric.title}**<br/><small>_{video_metric.channel}_</small>",
+                    unsafe_allow_html=True,
+                )
+                st.markdown("---")
+                st.markdown(f"**{humanize.intcomma(video_metric.views)}** views")
+    st.header('Summary')
+
 
 def run() -> None:
     """Run the streamlit app."""
