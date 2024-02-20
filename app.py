@@ -12,9 +12,10 @@ from database_modules.db import (
     get_total_video_count,
     get_video_metrics_by_video,
     get_total_unique_video_count,
-    get_total_unique_channel_count
+    get_total_unique_channel_count,
 )
 import streamlit as st
+from streamlit_player import st_player
 import humanize
 
 @st.cache_data()
@@ -103,10 +104,9 @@ def display_statistics(session) -> None:
     ):
         with columns[i].container(height=200):
             st.container(height=70, border=False).markdown(
-                f"**{channel_metric.channel}**"
+                f"**{channel_metric.channel}** - {humanize.intcomma(channel_metric.views)} views"
             )
-            st.markdown("---")
-            st.markdown(f"**{humanize.intcomma(channel_metric.views)}** views")
+            st.markdown(channel_metric.channel_url)
 
     more = st.button('See more')
     if more:
@@ -115,37 +115,31 @@ def display_statistics(session) -> None:
         ):
             with columns[i].container(height=200):
                 st.container(height=70, border=False).markdown(
-                    f"**{channel_metric.channel}**"
+                    f"**{channel_metric.channel}** - {humanize.intcomma(channel_metric.views)} views"
                 )
-                st.markdown("---")
-                st.markdown(f"**{humanize.intcomma(channel_metric.views)}** views")
+                st.markdown(channel_metric.channel_url)
+
 
 
     st.header(":musical_note: Most Watched Videos")
-    columns = st.columns(6)
+    columns = st.columns(3)
     for i, video_metric in enumerate(
-        get_video_metrics_by_video(session, limit=6, **filters)
+        get_video_metrics_by_video(session, limit=3, **filters)
     ):
-        with columns[i].container(border=True, height=280):
-            st.container(height=100, border=False).markdown(
-                f"**{video_metric.title}**<br/><small>_{video_metric.channel}_</small>",
-                unsafe_allow_html=True,
-            )
-            st.markdown("---")
+        with columns[i].container(border=True, height=500):
+            st.markdown(f"{video_metric.title}")
             st.markdown(f"**{humanize.intcomma(video_metric.views)}** views")
+            st_player(video_metric.titleUrl)
 
     more_videos = st.button('See more ')
     if more_videos:
         for i, video_metric in enumerate(
-            get_video_metrics_by_video(session, limit=6, offset=6, **filters)
+            get_video_metrics_by_video(session, limit=3, offset=3, **filters)
         ):
-            with columns[i].container(border=True, height=280):
-                st.container(height=100, border=False).markdown(
-                    f"**{video_metric.title}**<br/><small>_{video_metric.channel}_</small>",
-                    unsafe_allow_html=True,
-                )
-                st.markdown("---")
+            with columns[i].container(border=True, height=500):
+                st.markdown(f"{video_metric.title}")
                 st.markdown(f"**{humanize.intcomma(video_metric.views)}** views")
+                st_player(video_metric.titleUrl)
 
 
 def run() -> None:

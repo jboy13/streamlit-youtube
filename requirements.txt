@@ -1,4 +1,5 @@
 streamlit
+streamlit-player
 pandas
 duckdb
 duckdb_engine

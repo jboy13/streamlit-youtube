@@ -106,9 +106,10 @@ def get_video_metrics_by_channel(
         apply_filters(
             select(
                 Videos.channel,
-                func.count(Videos.channel).label("views")
+                func.count(Videos.channel).label("views"),
+                Videos.channel_url
             )
-            .group_by(Videos.channel)
+            .group_by(Videos.channel, Videos.channel_url)
             .order_by(func.count(Videos.channel).desc(), Videos.channel)
             .limit(limit)
             .offset(offset),
@@ -125,9 +126,10 @@ def get_video_metrics_by_video(
             select(
                 Videos.title,
                 Videos.channel,
+                Videos.titleUrl,
                 func.count(Videos.count).label("views")
             )
-            .group_by(Videos.title,Videos.channel)
+            .group_by(Videos.title,Videos.channel, Videos.titleUrl)
             .order_by(func.count(Videos.title).desc(),Videos.title)
             .limit(limit)
             .offset(offset),
