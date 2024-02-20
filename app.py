@@ -131,15 +131,25 @@ def display_statistics(session) -> None:
             st.markdown(f"**{humanize.intcomma(video_metric.views)}** views")
             st_player(video_metric.titleUrl)
 
-    more_videos = st.button('See more ')
-    if more_videos:
-        for i, video_metric in enumerate(
-            get_video_metrics_by_video(session, limit=3, offset=3, **filters)
-        ):
-            with columns[i].container(border=True, height=500):
-                st.markdown(f"{video_metric.title}")
-                st.markdown(f"**{humanize.intcomma(video_metric.views)}** views")
-                st_player(video_metric.titleUrl)
+    see_more = st.button('See More')
+
+    if see_more:
+        video_metrics = get_video_metrics_by_video(session, limit=60, offset=3, **filters)
+        
+        # Assuming each video_metric contains title and titleUrl attributes
+        for i in range(0, len(video_metrics), 3):
+            row_videos = video_metrics[i:i+3]
+            
+            # Create three columns for each row
+            col1, col2, col3 = st.columns(3)
+            
+            for j, video_metric in enumerate(row_videos):
+                # Display each video in a separate column
+                col = col1 if j == 0 else col2 if j == 1 else col3
+                with col.container(border=True, height=500):
+                    st.markdown(f"{video_metric.title}")
+                    st.markdown(f"**{humanize.intcomma(video_metric.views)}** views")
+                    st_player(video_metric.titleUrl)
 
 
 def run() -> None:

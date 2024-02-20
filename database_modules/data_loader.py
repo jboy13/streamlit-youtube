@@ -25,6 +25,7 @@ SELECT
 FROM
     read_json_auto('data/watch-history.json')
 WHERE subtitles IS NOT NULL
+AND title != 'Answered survey question'
 """
 
 
