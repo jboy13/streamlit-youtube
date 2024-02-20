@@ -7,7 +7,7 @@ from typing import IO
 import pandas as pd
 import duckdb
 
-from database.db import Session
+from database_modules.db import Session
 
 
 SQL ="""

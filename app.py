@@ -1,8 +1,8 @@
 
 from datetime import date, timedelta
 
-from database.data_loader import load_to_db
-from database.db import (
+from database_modules.data_loader import load_to_db
+from database_modules.db import (
     get_session,
     get_date_range,
     get_channels,
