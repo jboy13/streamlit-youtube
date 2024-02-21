@@ -97,7 +97,7 @@ def display_statistics(session) -> None:
         video_count_by_day(session, **filters), x="date", y="views", color="#1DB954"
     )
 
-    st.header(":microphone: Most Watched Channel")
+    st.header(":film_frames: Most Watched Channels")
     columns = st.columns(6)
     for i, channel_metric in enumerate(
         get_video_metrics_by_channel(session, limit=6, **filters)
@@ -121,7 +121,7 @@ def display_statistics(session) -> None:
 
 
 
-    st.header(":musical_note: Most Watched Videos")
+    st.header(":tv: Most Watched Videos")
     columns = st.columns(3)
     for i, video_metric in enumerate(
         get_video_metrics_by_video(session, limit=3, **filters)
