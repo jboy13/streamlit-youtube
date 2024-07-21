@@ -166,7 +166,7 @@ def run() -> None:
     st.title("Youtube Watch History")
 
     placeholder = st.empty()
-    placeholder.markdown(":point_left: _Upload the json file to get started_")
+    placeholder.markdown(":point_left: _Upload your Google Takeout Youtube history JSON to get started_ \n\n To download your data visit: https://takeout.google.com/settings/takeout select 'YouTube and YouTube Music' and on 'multiple formats' ensure JSON is selected for history")
 
     uploaded_file = st.sidebar.file_uploader(
         "Upload Youtube Watch History", type="json"
