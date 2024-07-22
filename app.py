@@ -18,54 +18,9 @@ import streamlit as st
 from streamlit_player import st_player
 import humanize
 
-@st.cache_data()
-def process_history(_session):
-    """Process json file"""
-    return load_to_db(_session)
-
-@st.cache_data()
-def total_video_count(_session, **filters) -> int:
-    """Total number of videos."""
-    return get_total_video_count(_session, **filters)
-
-@st.cache_data()
-def video_count_by_day(_session, **filters):
-    """Videos by day."""
-    return get_video_count_by_day(_session, **filters)
-
-@st.cache_data()
-def video_metrics_by_channel(_session, limit, **filters):
-    """Stream count and play time by artist."""
-    return get_video_metrics_by_channel(_session, limit, **filters)
-
-@st.cache_data()
-def date_range(_session) -> tuple[date, date]:
-    """Minimum and maximum date of the data."""
-    return get_date_range(_session)
-
-@st.cache_data()
-def channels(_session) -> list[str]:
-    """List of channels."""
-    return get_channels(_session)
-
-@st.cache_data()
-def videos(_session) -> list[str]:
-    """List of videos."""
-    return get_videos(_session)
-
-@st.cache_data()
-def total_unique_channels(_session, **filters) -> int:
-    """List of videos."""
-    return get_total_unique_channel_count(_session, **filters)
-
-@st.cache_data()
-def total_unique_videos(_session, **filters) -> int:
-    """List of videos."""
-    return get_total_unique_video_count(_session, **filters)
-
 def display_filters(session) -> dict:
     """Display the data filters."""
-    date_range_start, date_range_end = date_range(session)
+    date_range_start, date_range_end = get_date_range(session)
     start_date, end_date = st.sidebar.slider(
         "Watch date",
         min_value=date_range_start,
@@ -76,16 +31,16 @@ def display_filters(session) -> dict:
     return {
         "start_date": start_date,
         "end_date": end_date,
-        "channels": st.sidebar.multiselect("Channels", channels(session)),
-        "videos": st.sidebar.multiselect("Videos", videos(session)),
+        "channels": st.sidebar.multiselect("Channels", get_channels(session)),
+        "videos": st.sidebar.multiselect("Videos", get_videos(session)),
     }
 
 def display_statistics(session) -> None:
     """Display the listening statistics."""
     filters = display_filters(session)
 
-    video_count = total_video_count(session, **filters)
-    unique_channels = total_unique_channels(session, **filters)
+    video_count = get_total_video_count(session, **filters)
+    unique_channels = get_total_unique_channel_count(session, **filters)
 
     st.markdown(
         f"""
@@ -94,7 +49,7 @@ def display_statistics(session) -> None:
         """,
     )
     st.bar_chart(
-        video_count_by_day(session, **filters), x="date", y="views", color="#1DB954"
+        get_video_count_by_day(session, **filters), x="date", y="views", color="#1DB954"
     )
 
     st.header(":film_frames: Most Watched Channels")
@@ -160,7 +115,7 @@ def run() -> None:
         layout="wide",
         initial_sidebar_state="expanded",
     )
-    db_session = st.cache_resource(get_session)()
+    db_session = get_session()
 
     # Process uploaded file
     st.title("Youtube Watch History")
@@ -179,7 +134,7 @@ def run() -> None:
         file_path = 'data/watch-history.json'
         with open(file_path,'wb') as f:
             f.write(uploaded_file.read())
-        process_history(db_session)
+        load_to_db(db_session)
 
     display_statistics(db_session)
 
